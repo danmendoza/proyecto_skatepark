@@ -1,0 +1,67 @@
+import bpy
+
+# Buscar el área del 3D Viewport
+for area in bpy.context.screen.areas:
+    if area.type == 'VIEW_3D':
+        for space in area.spaces:
+            print("hola")
+            if space.type == 'VIEW_3D':
+                print("adios")
+                # Ajustar la escala de la cuadrícula
+                space.overlay.grid_scale = 0.001 # Reduce para más densidad
+                space.overlay.show_floor = True
+                space.overlay.show_axis_x = True
+                space.overlay.show_axis_y = True
+                break
+            
+            
+            
+cam_position = Euler((1.6433902978897095, 8.39507208638679e-07, 1.1849370002746582), 'XYZ')
+cam_rotation = Vector((34.17158508300781, -15.372434616088867, 1.7000000476837158))
+
+area_hipotetica = 1411 #m2
+ancho_norte = 14.25 #m
+ancho_sur = 15.45 #m
+largo_oeste = 64.48 #m
+largo este = 72.23 #m
+area_real = 1015.07 #m2
+
+# Crear un plano (se ubicará en el plano XY)
+bpy.ops.mesh.primitive_plane_add(size=1, location=(0, 0, 0))
+obj = bpy.context.object
+
+# Cambiar el modo a edición para manipular los vértices
+bpy.ops.object.mode_set(mode='EDIT')
+
+# Limpiar los vértices previos (el plano por defecto tiene 4 vértices)
+bpy.ops.mesh.select_all(action='SELECT')
+bpy.ops.mesh.delete(type='VERT')
+
+# Volver al modo de objeto para crear un nuevo trapecio
+bpy.ops.object.mode_set(mode='OBJECT')
+
+# Crear los vértices del trapecio
+vertices = [
+    (-ancho_norte / 2, largo_oeste / 2, 0),  # Vértice 1 (norte-izquierda)
+    (ancho_norte / 2, largo_oeste / 2, 0),   # Vértice 2 (norte-derecha)
+    (ancho_sur / 2, -largo_este / 2, 0),     # Vértice 3 (sur-derecha)
+    (-ancho_sur / 2, -largo_este / 2, 0),    # Vértice 4 (sur-izquierda)
+]
+
+# Crear las caras del trapecio
+edges = []
+faces = [
+    (0, 1, 2, 3),  # Una cara con los 4 vértices
+]
+
+# Crear la malla con los vértices, bordes y caras
+mesh = bpy.data.meshes.new(name="Trapecio")
+mesh.from_pydata(vertices, edges, faces)
+
+# Asignar la malla a un objeto y añadirlo a la escena
+obj = bpy.data.objects.new("Trapecio", mesh)
+bpy.context.collection.objects.link(obj)
+
+# Activar el objeto para ver el resultado
+bpy.context.view_layer.objects.active = obj
+obj.select_set(True)
